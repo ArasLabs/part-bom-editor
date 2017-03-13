@@ -1,0 +1,274 @@
+﻿<AML>
+ <Item type="Method" id="B8DAF30DEC874C219FE3F767FC8C759C" action="add">
+  <comments>Composition tree information is saved. (Parts BOM Editor)</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[//  (Parts BOM Editor)
+//  Method : GetItemTreeGridStructure
+//  Details  : Composition tree information is acquired. 
+//  Date    :  May 1, 2013 
+// 
+Innovator inno = this.getInnovator();
+string newParentId = "";
+// リクエスト取得
+XmlElement inItem = (XmlElement)this.dom.SelectSingleNode("//Item[@type='Method' and @action='GetItemTreeGridStructure']/Item");
+CCO.Utilities.WriteDebug("GetItemTreeGridStructure.log", "inItem:" + inItem.OuterXml);
+
+// リクエスト情報が存在する場合は、構成データを取得する
+if (inItem != null)
+{
+	// リクエスト情報をXML形式に変換
+	XmlDocument resDOM = CCO.XML.CreateXMLDocument();
+	XmlElement result = CCO.XML.MakeBorders(ref resDOM, true);
+
+	// ArasのStructureBrowserクラスをラップしたクラス呼び出し
+	MyStructureBrowser sb = new MyStructureBrowser(ref CCO,inno);
+
+     // level情報の取得
+	int levelsToSelect;
+	if (false == Int32.TryParse(inItem.GetAttribute("levels"), out levelsToSelect))
+	{
+		levelsToSelect = 2;
+	}
+	string mode = inItem.GetAttribute("mode");
+	if ( mode == "add" )
+	{
+		newParentId = inno.getNewID();
+	}
+	// 構成情報呼び出し
+	String structureResult = sb.GetItemsForStructureBrowser(inItem.GetAttribute("type"),
+		inItem.GetAttribute("id"),
+		inItem.GetAttribute("compareToITName"),
+		inItem.GetAttribute("compareToId"),
+		levelsToSelect);
+
+     // 取得した構成情報をXML形式に変換
+	XmlDocument doc = new XmlDocument();
+	doc.LoadXml(structureResult);
+	CCO.Utilities.WriteDebug("GetItemTreeGridStructure.log", "element:" + doc.DocumentElement.OuterXml);
+
+	string json = "";
+	string parentId = "";
+	int count = 0;
+	// XML形式をJSONデータに変換
+		parseXmlToJson(doc.DocumentElement, ref json, ref count,  parentId,  newParentId);
+	CCO.Utilities.WriteDebug("testGetItemTreeGridStructurelog", "result:" + json);
+
+     // メソッド戻り値用変換値(XML形式)として設定
+	result.InnerXml = "<Json>" + json + "</Json>";
+
+     // 取得した結果をAML形式に変換
+	Aras.IOM.Item resItem = this.newItem("");
+	resItem.loadAML(resDOM.OuterXml);
+	// 正常終了
+	     return resItem;
+}
+else
+    // 未設定時はnull
+    return null;
+}
+
+/// <summary>
+/// XMLからJSON形式へ変換する
+/// </summary>
+/// <param name="element">XMLエレメント情報</param>
+/// <param name="json">JSON情報を格納するための変数</param>
+/// <param name="count">カウント情報</param>
+/// <param name="parentId">親アイテムID</param>
+/// <param name="newParentId">処理フラグadd時のTOPリレーションシップID</param>
+public void parseXmlToJson(XmlElement element, ref String json, ref int count, string parentId, string newParentId)
+{
+	// XMLエレメント情報が未設定の場合は処理終了
+	if (element == null)
+	{
+		return;
+	}
+     // 個別に取得する変数の初期化
+	string name = "";
+	string quantity = "";
+	string reID = "";
+	string lockFlag = "";
+	string config_id = "";
+	string sort_order = "";
+	string lockImageFlag = "part";
+	string action = "get";
+
+     // XMLエレメントからkeyed_name属性値が存在する場合のみ処理する
+	if(!String.IsNullOrEmpty(element.GetAttribute("keyed_name")))
+	{
+		// keyed_name 設定値を":"で分割する。
+		string[] keyedNameParam = element.GetAttribute("keyed_name").Split(':');
+		// keyed_name 要素から名称を取得するための分割要素の設定
+		string[] delimiter = { " - " };
+		
+		try
+		{
+			name = keyedNameParam[0].Split(delimiter, StringSplitOptions.None)[1] + " - " + keyedNameParam[0].Split(delimiter, StringSplitOptions.None)[2];
+			quantity = keyedNameParam[1];
+			if("0"==quantity) {
+				quantity = "";
+			}
+			reID = keyedNameParam[2];
+			// 追加モードの場合、先頭のリレーションシップアイテムIDについては新規作成する
+			if ( string.IsNullOrEmpty(reID) == true )
+			{
+				reID = newParentId;
+			}
+			config_id = keyedNameParam[3];
+			sort_order = keyedNameParam[4];
+			lockFlag = keyedNameParam[5];
+			// ロック情報から表示用イメージの変換
+			if ( lockFlag == "1" ) {
+				lockImageFlag = "part-lock";
+				action = "get";
+			}
+			else if (lockFlag == "2" ) {
+				lockImageFlag = "other-lock";
+				action = "get";
+			}
+	     }
+	     catch
+	     {
+	     	// Exceptionが発生した場合も処理継続する（データはその時点までの値）
+	     }
+	}
+	count++;
+	// 属性の設定
+	json += "{";
+	json += "\"data\":{\"title\":\"" + name + "\"},";
+	if (element.SelectSingleNode("relatedItems") != null)
+	{
+	    json += "\"state\":\"open\",";
+	}
+	json += "\"attr\":{\"id\":\""+ reID + "_" + element.GetAttribute("id")  + "_" + count  +"\",\"rel\":\""+lockImageFlag+"\"},";
+	json += "\"metadata\":{";
+	json += "\"id\":\""+ element.GetAttribute("id") + "\",";
+	json += "\"type\":\""+ element.GetAttribute("type") + "\",";
+	json += "\"lock\":\""+ lockFlag + "\",";
+	json += "\"parentId\":\""+ parentId + "\",";
+	json += "\"partbomId\":\""+ reID + "\",";
+	json += "\"configId\":\""+ config_id + "\",";
+	json += "\"action\":\""+action+"\",";
+	json += "\"quantity\":\""+ quantity + "\",";
+	json += "\"disptitle\":\""+ name + "\",";
+	json += "\"sort_order\":\""+ sort_order + "\"";
+	json += "}";
+
+	if (element.SelectSingleNode("relatedItems") != null)
+	{
+		XmlNodeList list = element.SelectNodes("relatedItems/Item");
+		json += ",\"children\":[";
+
+		int i = 0;
+		foreach (XmlElement node in list)
+		{
+			if (i != 0)
+			{
+				json += ",";
+			}
+			parseXmlToJson(node, ref json, ref count, element.GetAttribute("id") , "");
+			i++;
+		}
+		json += "]}";
+		return;
+	}
+	json += "}";
+}
+
+/// <summary>
+/// 構成要素取得クラス
+/// </summary>
+public class MyStructureBrowser : Aras.Server.Core.StructureBrowser
+{
+	Innovator _inno;
+	
+	public MyStructureBrowser(ref Aras.Server.Core.CallContext callContext,Innovator inno)
+	: base(ref callContext)
+	{
+		// 各アイテムタイプのフィールドおよびリレーションシップフィルタ設定
+		itemPropertiesToSelect["Part"] = new string[] { "locked_by_id", "config_id" };
+		itemTypeRelshipsToSelect["Part"] = new string[] { "Part BOM"};
+		_inno = inno;
+	}
+
+	/// <summary>
+	/// 構成要素取得
+	/// </summary>
+	/// <param name="itemTypeName">アイテムタイプ</param>
+	/// <param name="rs">レコードセット情報</param>
+	/// <returns>構成要素</returns>
+	public override Aras.Server.Core.StructureItem GetNewStructureItem(string itemTypeName, Aras.Server.Core.InnovatorDataSet rs)
+	{
+		if (String.Equals(itemTypeName, "Part", StringComparison.Ordinal))
+		{
+		//Call the custom structure Item
+		//"Part","AG_Material","AG_Substance"の場合拡張したStructureItemクラス
+		CCO.Utilities.WriteDebug("test.log", "result:" + rs);
+		return new MyStructureItem(rs, _inno);
+		}
+		else
+		{
+		//Call Default Structure Item
+		//上記以外、デフォルトのStructureItemクラス
+		return new Aras.Server.Core.StructureItem(rs);
+		}
+	}
+}
+
+/// <summary>
+/// 構成要素格納クラス
+/// </summary>
+public class MyStructureItem : Aras.Server.Core.StructureItem
+{
+	private Innovator _inno;
+	private string _config_id;
+	
+	public MyStructureItem(Aras.Server.Core.InnovatorDataSet rs, Innovator inno) //, string config_id)
+	: base(rs)
+	{
+		_inno = inno;
+		_config_id = rs["config_id",""].ToString();
+	}
+
+	/// <summary>
+	/// 対象Itemのkeyed_nameを返す
+	/// </summary>
+	public override string Keyed_name
+	{
+		get
+		{
+			string kn = base.Keyed_name;
+			string qty = "0";
+			string rsid = "";
+			string sort_order = "";
+			string lockflag = "0";
+			// 自身のIDのロック情報を取得する。
+			Item mySrcItem = _inno.newItem("Part", "get");
+			mySrcItem.setID(this.Id);
+			Item myItem = mySrcItem.apply();
+			if ( myItem.isError() == false )
+			{
+			    lockflag = myItem.getItemByIndex(0).getLockStatus().ToString();
+			}
+			
+			// 自身のIDと、親のIDが不一致であれば、子部品として構成数の取得を行う
+			if (this.Source_id != this.Id)
+			{
+				Item getQuantity = _inno.newItem("Part BOM", "get");
+				getQuantity.setAttribute("select", "id, quantity, sort_order");
+				getQuantity.setProperty("source_id", this.Source_id);
+				getQuantity.setProperty("related_id", this.Id);
+				getQuantity = getQuantity.apply();
+				if (!getQuantity.isError())
+				{
+					rsid =  getQuantity.getID();
+					qty = getQuantity.getProperty("quantity", "0");
+					sort_order = getQuantity.getProperty("sort_order", "0");
+				}
+			}
+			return kn + ":" + qty + ":" + rsid + ":" + _config_id+ ":" + sort_order + ":" + lockflag;
+		}
+	}]]></method_code>
+  <method_type>C#</method_type>
+  <name>GetItemTreeGridStructure</name>
+ </Item>
+</AML>

@@ -1,0 +1,69 @@
+/* Mini layout previews
+-------------------------------------------------- */
+.mini-layout {
+  border: 1px solid #ddd;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.075);
+     -moz-box-shadow: 0 1px 2px rgba(0,0,0,.075);
+          box-shadow: 0 1px 2px rgba(0,0,0,.075);
+}
+.mini-layout,
+.mini-layout .mini-layout-body,
+.mini-layout.fluid .mini-layout-sidebar {
+  width: 100%;
+  height: 415px;
+  overflow: auto;
+}
+.mini-layout {
+  margin-bottom: 20px;
+  padding: 9px;
+}
+.mini-layout div {
+  -webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+}
+.mini-layout .mini-layout-body {
+  margin: 0 auto;
+  width: 100%;
+}
+.mini-layout.fluid .mini-layout-sidebar,
+.mini-layout.fluid .mini-layout-header,
+.mini-layout.fluid .mini-layout-body {
+  float: left;
+}
+.mini-layout.fluid .mini-layout-sidebar {
+  background-color: #ffffC8;
+  width: 35%;
+}
+.mini-layout.fluid .mini-layout-body {
+  width: 58%;
+  margin-left: 4.5%;
+}
+.button-new {
+  background-image: url("./icon/new.png");
+  background-repeat: no-repeat;
+}
+
+.button-remove {
+  background-image: url("./icon/remove.png");
+  background-repeat: no-repeat;
+}
+.button-expand {
+  background-image: url("./icon/expand.png");
+  background-repeat: no-repeat;
+}
+.button-collapse {
+  background-image: url("./icon/collspand.png");
+  background-repeat: no-repeat;
+}
+.button-save {
+  background-image: url("./icon/save.png");
+  background-repeat: no-repeat;
+}
+.copyright{
+  color:#999;
+  text-align:right;
+}

@@ -1,0 +1,143 @@
+﻿<AML>
+ <Item type="Method" id="A8F2774969594D57B79C36D866374D98" action="add">
+  <comments>Composition label of tree information is acquired. (Parts BOM Editor)</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[//  (Parts BOM Editor)
+//  Method :  GetItemTreeGridStructureLabel
+//  Details  : Composition label of tree information is acquired. 
+//  Date    :  May 1, 2013 
+// 
+// ラベル格納変数名
+const string LABEL_VARIABLE_NAME = "PartsBOMEditorItemLabel";
+const string LABEL_RS_VARIABLE_NAME = "PartsBOMEditorRelationShipLabel";
+string itemTypeName = "Part";
+
+// リクエスト取得
+XmlElement inItem = (XmlElement)this.dom.SelectSingleNode("//Item[@type='Method' and @action='GetItemTreeGridStructureLabel']/Item");
+
+// 取得対象ラベル情報の切り分け
+string variableName = LABEL_VARIABLE_NAME;
+if ( inItem != null && inItem.GetAttribute("type") == "PART BOM") 
+{
+	variableName = LABEL_RS_VARIABLE_NAME;
+	itemTypeName = inItem.GetAttribute("type");
+}
+
+Innovator inno = this.getInnovator();
+
+XmlDocument resDOM = CCO.XML.CreateXMLDocument();
+XmlElement result = CCO.XML.MakeBorders(ref resDOM, true);
+
+// アイテム - ラベル用変数の取得
+Item variablItem = inno.newItem("Variable", "get");
+variablItem.setProperty("name", variableName);
+Item retVariableItem = variablItem.apply();
+if ( retVariableItem.isError() )
+{
+	//　変数が取得できない場合はエラーを返す。
+	return retVariableItem;
+}
+// 変数リストの取得
+string variable = retVariableItem.getItemByIndex(0).getProperty("value");
+string[] varArray = variable.Split(',');
+// 変数設定項目の取得
+string var_editView = retVariableItem.getItemByIndex(0).getProperty("default_value");
+string[] varEVArray = var_editView.Split(',');
+if ( varArray.Length != varEVArray.Length )
+{
+	//　変数が取得できない場合はエラーを返す。
+	return inno.newError("ItemTreeGridStructureLabel変数の設定値が異常です。");
+}
+
+string resultData = "";
+for ( int count = 0; count < varArray.Length; count++ )
+{
+
+	string propName = varArray[count];
+	string propDiv = varEVArray[count];
+	
+	// プロパティアイテムの取得
+	Item propItem = inno.newItem("Property", "get");
+	propItem.setProperty("name", propName);
+	// アイテムタイプとの連携
+	Item itemItem = inno.newItem("ItemType", "get");
+	itemItem.setProperty("name", itemTypeName);
+	propItem.setPropertyItem("source_id", itemItem);
+	// プロパティアイテムの取得
+	Item retPropItem = propItem.apply();
+
+     // プロパティアイテムの各データの取得
+     string label = "";
+	string propType = "";
+	string dataLength = "";
+	string listValue = "";
+	if ( retPropItem.isError() == true) 
+	{
+          propDiv = "V";
+          label = "--";
+	}
+	else
+	{
+		label = retPropItem.getItemByIndex(0).getProperty("label");
+		propType = retPropItem.getItemByIndex(0).getProperty("data_type");
+		if ( propType == "list" )
+		{
+			// リストデータの取得
+			Item listItem = inno.newItem("List", "get");
+			listItem.setID(retPropItem.getItemByIndex(0).getProperty("data_source"));
+               // 検索対象のValueアイテムの取得
+			Item valueItem = inno.newItem("Value", "get");
+			valueItem.setAttribute("order_by", "sort_order");
+			valueItem.setPropertyItem("source_id", listItem);
+               // Valueアイテムの検索
+			Item resListItem = valueItem.apply();
+			if ( resListItem.isError() == false )
+			{
+				// データが存在する場合は、そのデータを格納
+				for ( int lcnt = 0; lcnt < resListItem.getItemCount(); lcnt++)
+				{
+					string l_label = resListItem.getItemByIndex(lcnt).getProperty("label");
+					string l_value = resListItem.getItemByIndex(lcnt).getProperty("value");
+					listValue += "<List><label>"+l_label+"</label><value>"+l_value+"</value></List>";
+				}
+			}
+		}
+		else if ( propType == "string"|| propType == "multilingual string" )
+		{
+		     dataLength = retPropItem.getItemByIndex(0).getProperty("stored_length");
+			// プロパティ名が[classification]の場合は、分類リストを作成する。
+			if ( propName == "classification" )
+			{
+				listValue += "<List><label>Assembly</label><value>Assembly</value></List>";
+				listValue += "<List><label>Component</label><value>Component</value></List>";
+				listValue += "<List><label>Material</label><value>Material</value></List>";
+				listValue += "<List><label>Software</label><value>Software</value></List>";
+			}
+		}
+		else if ( propType == "integer" || propType == "decimal" || propType == "float")
+		{
+			dataLength = retPropItem.getItemByIndex(0).getProperty("prec");
+		}
+		else if ( propType == "boolean")
+		{
+			dataLength = "1";
+		}
+	}
+	resultData += "<Item>";
+	resultData += "<name>"+label+"</name>";
+	resultData += "<propertyname>"+propName+"</propertyname>";
+	resultData += "<pdiv>"+propDiv+"</pdiv>";
+	resultData += "<length>"+dataLength+"</length>";
+	resultData += listValue;
+	resultData += "</Item>";
+}
+result.InnerXml = resultData;
+
+Aras.IOM.Item resItem = this.newItem("");
+resItem.loadAML(resDOM.OuterXml);
+return resItem;
+]]></method_code>
+  <method_type>C#</method_type>
+  <name>GetItemTreeGridStructureLabel</name>
+ </Item>
+</AML>

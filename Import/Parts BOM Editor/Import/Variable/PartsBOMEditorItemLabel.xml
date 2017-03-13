@@ -1,0 +1,7 @@
+﻿<AML>
+ <Item type="Variable" id="E0712CE3702447BE9FEC57F5FDA1698F" action="add">
+  <default_value>E,V,E,E,V,E,E,E</default_value>
+  <name>PartsBOMEditorItemLabel</name>
+  <value>item_number,major_rev,name,classification,state,unit,make_buy,description</value>
+ </Item>
+</AML>

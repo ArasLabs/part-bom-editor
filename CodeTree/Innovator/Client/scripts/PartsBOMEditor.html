@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Parts BOM Editor</title>
+	<link rel="stylesheet" type="text/css" href="../styles/PartsBOMEditor/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../styles/PartsBOMEditor/PartsBOMEditor.css">
+	<link rel="stylesheet" type="text/css" href="../styles/PartsBOMEditor/jquery.loadmask.css">
+	<link rel="stylesheet" type="text/css" href="../styles/PartsBOMEditor/icon.css">
+	<link rel="stylesheet" type="text/css" href="../styles/PartsBOMEditor/bootstrap-responsive.min.css">
+	<script type="text/javascript" src="../javascript/PartsBOMEditor/jquery-1.8.0.min.js"></script>
+	<script type="text/javascript" src="../javascript/PartsBOMEditor/jquery.jstree.js"></script>
+	<script type="text/javascript" src="../javascript/PartsBOMEditor/jquery.loadmask.min.js"></script>
+	<script type="text/javascript" src="../javascript/PartsBOMEditor/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../javascript/PartsBOMEditor/partsbomeditor.js"></script>
+</head>
+<body>
+    <div class="container" id="attribute_table" >
+        <h3 class="muted">&nbsp;&nbsp;&nbsp;Parts BOM Editor</h3>
+        <p>
+          <div class="span" style="text-align:left;float:left;">
+              <button class="btn" type="button" onclick="expandAll()"><i class="button-expand">&nbsp&nbsp&nbsp&nbsp</i>&nbsp;Expand All</button>
+              <button class="btn" type="button" onclick="collapseAll()"><i class="button-collapse">&nbsp&nbsp&nbsp&nbsp</i>&nbsp;Close All</button>
+          </div>
+          <div style="text-align:right;">
+              <button class="btn" type="button" style="vertical-align:top;" onclick="onclickSaveParts()"><i class="button-save">&nbsp&nbsp&nbsp&nbsp</i>&nbsp;save</button>
+          </div>
+        </p>
+        <div class="container-fluid">
+          <div class="mini-layout fluid">
+            <div id="tt" class="mini-layout-sidebar"></div>
+            <div class="mini-layout-body">
+              <ul id="tab" class="nav nav-tabs">
+                <li class="active"><a href="#Part" data-toggle="tab">Part</a></li>
+                <li><a href="#PartBOM" data-toggle="tab">Part BOM</a></li>
+              </ul>
+              <div id="myTabContent" class="tab-content">
+                <div class="tab-pane fade in active" id="Part"></div>
+                <div class="tab-pane fade" id="PartBOM"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="margin:0px;">
+          <div class="span"></div>
+        </p>
+    </div>
+</body>
+</html>
