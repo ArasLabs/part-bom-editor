@@ -1,0 +1,21 @@
+﻿<AML>
+ <Item type="Item Action" id="28E9F4FEB7764ED39CDDF530A7CCB84A" action="add">
+  <related_id keyed_name="PartsBOMEditorPouupWindow" type="Action">
+   <Item type="Action" id="7160DBCFE26C41879F008D4C3FA7D0CC" action="add">
+    <item_query>&lt;Item type="{@type}" id="{@id}" levels= "1" action="get" /&gt;</item_query>
+    <label xml:lang="en">Parts BOM Editor</label>
+    <location>client</location>
+    <method keyed_name="PartsBOMEditorPopupWindow" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PartsBOMEditorPopupWindow</name>
+     </Item>
+    </method>
+    <name>PartsBOMEditorPouupWindow</name>
+    <target>none</target>
+    <type>item</type>
+   </Item>
+  </related_id>
+  <sort_order>1280</sort_order>
+  <source_id keyed_name="Part" type="ItemType" name="Part">4F1AC04A2B484F3ABA4E20DB63808A88</source_id>
+ </Item>
+</AML>

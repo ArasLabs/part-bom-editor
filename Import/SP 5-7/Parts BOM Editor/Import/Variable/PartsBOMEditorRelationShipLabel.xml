@@ -1,0 +1,7 @@
+﻿<AML>
+ <Item type="Variable" id="A3CD5B937D4F41D9BE34C4968EB31AA2" action="add">
+  <default_value>E,E</default_value>
+  <name>PartsBOMEditorRelationShipLabel</name>
+  <value>quantity,sort_order</value>
+ </Item>
+</AML>

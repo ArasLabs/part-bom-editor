@@ -1,0 +1,64 @@
+﻿<AML>
+ <Item type="Method" id="E2789AAC18DD4531AD6EE6A02E7475A4" action="add">
+  <comments>The lock state of Part Item is checked. (Parts BOM Editor)</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[//  (Parts BOM Editor)
+//  Method : GetItemTreeGridItemLocked
+//  Details  : The lock state of Part Item is checked. 
+//  Date    :  May 1, 2013 
+// 
+Innovator inno = this.getInnovator();
+
+// Acquisition of the argument of a method call 
+XmlElement inItem = (XmlElement)this.dom.SelectSingleNode("//Item[@type='Method' and @action='GetItemTreeGridItemLocked']/Item");
+
+// Result Locked Flag Initialize.
+string result = "0";
+
+// Composition data is acquired when request information exists.
+if (inItem != null)
+{
+	// item type for acquisition 
+	string itemTypeName = inItem.GetAttribute("type");
+	// item id for acquisition 
+	string itemId = inItem.GetAttribute("id");
+	
+	// The following processings are performed when both an item type and item ID exist. 
+	if ( string.IsNullOrEmpty(itemTypeName) == false && 
+	     string.IsNullOrEmpty(itemId) == false )
+	{
+		// Item acquisition to object item ID 
+		Item itemItem = inno.newItem(itemTypeName, "get");
+		itemItem.setID( itemId );
+
+		// When an item type is except Part. (= Part BOM)
+		if ( itemTypeName != "Part" )	{
+			// Acquisition of a relationship item 
+			Item relsItem = inno.newItem(itemTypeName, "get");
+			relsItem.setID(itemId);
+			Item relsRetItem = relsItem.apply();
+
+			// When a result is normal 
+			if ( relsRetItem.isError() == false )	{
+				// Creation of the search information for Part 
+				itemItem = inno.newItem("Part", "get");
+				itemItem.setID(relsRetItem.getItemByIndex(0).getProperty("related_id"));
+			}
+		}
+		// Part item is searched 
+		Item retItem = itemItem.apply();
+
+		// When a result is normal 
+		if ( retItem.isError() == false )
+		{
+			// lock flag is acquired from a search-results Part item. 
+			result = retItem.getItemByIndex(0).getLockStatus().ToString();
+		}
+	}
+}
+return inno.newResult(result);
+]]></method_code>
+  <method_type>C#</method_type>
+  <name>GetItemTreeGridItemLocked</name>
+ </Item>
+</AML>

@@ -13,12 +13,14 @@ Release notes/descriptions for the original project posted on the previous Aras 
 
 Release | Notes
 --------|--------
-[v1.0](https://github.com/ArasLabs/part-bom-editor/releases/tag/v1.0) | 	Includes AML Package, Client source code, and ReadMe PDF.
+[v2.0](https://github.com/ArasLabs/part-bom-editor/releases/tag/v2.0) | Support 9.3 SP0 to SP7. Select your SP version when you import it.
+[v1.0](https://github.com/ArasLabs/part-bom-editor/releases/tag/v1.0) | Includes AML Package, Client source code, and ReadMe PDF.
 
 #### Supported Aras Versions
 
 Project | Aras
 --------|------
+[v2.0](https://github.com/ArasLabs/part-bom-editor/releases/tag/v2.0) | Aras 9.3 - 9.3 SP7
 [v1.0](https://github.com/ArasLabs/part-bom-editor/releases/tag/v1.0) | Aras 9.3 - 9.3 SP7
 
 > ###### *Please note: Aras Community Projects are provided on an "as-is" basis.*
